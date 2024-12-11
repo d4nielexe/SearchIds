@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FreeFireInfo | Busca de Itens</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            background-color: #1f2937;
+            color: #f9fafb;
+            font-family: Arial, sans-serif;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: bold;
+        }
+        .header p {
+            font-size: 1rem;
+            color: #9ca3af;
+        }
+        .search-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+        .search-box {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+        }
+        .search-box input {
+            width: 100%;
+            padding: 1rem;
+            padding-left: 3rem;
+            border: 2px solid #374151;
+            border-radius: 0.5rem;
+            background-color: #1f2937;
+            color: #f9fafb;
+            font-size: 1rem;
+        }
+        .search-box .icon {
+            position: absolute;
+            top: 50%;
+            left: 1rem;
+            transform: translateY(-50%);
+            font-size: 1.5rem;
+            color: #9ca3af;
+        }
+        .search-box input:focus {
+            border-color: #60a5fa;
+            outline: none;
+        }
+        .result {
+            border: 1px solid #374151;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0.5rem;
+            background-color: #374151;
+            transform: scale(0.9);
+            transition: transform 0.3s ease, opacity 0.3s ease;
+            opacity: 0;
+        }
+        .result.visible {
+            transform: scale(1);
+            opacity: 1;
+        }
+        .loading {
+            color: #60a5fa;
+            text-align: center;
+        }
+        .footer {
+            margin-top: 2rem;
+            text-align: center;
+            color: #9ca3af;
+            font-size: 0.875rem;
+        }
+        .contact {
+            margin-top: 2rem;
+            text-align: center;
+            background-color: #374151;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            color: #f9fafb;
+        }
+        .contact a {
+            color: #60a5fa;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .contact a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body class="p-6">
+    <!-- -->
+    <div class="header">
+        <h1>Busca de Itens - FreeFire</h1>
+    </div>
+
+    <!-- -->
+    <div class="search-container">
+        <div class="search-box">
+            <i class="fas fa-search icon"></i>
+            <input type="text" id="search" placeholder="">
+        </div>
+        <button id="searchButton" class="px-4 py-2 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-500 focus:ring focus:ring-blue-400">
+            Buscar
+        </button>
+    </div>
+
+    <!-- -->
+    <p id="resultCount" class="mt-4 text-sm text-gray-400 text-center">Resultados: 0</p>
+    <div id="results" class="mt-4"></div>
+    <p id="loadingMessage" class="loading hidden">Carregando dados...</p>
+
+    <!--  -->
+    <div class="contact">
+    <p>
+        <a href="https://t.me/freefireleaksf" target="_blank"><i class="fab fa-telegram"></i>Free Fire Leaks</a>
+    </p>
+    <p>
+        <a href="https://t.me/Fearqwzz" target="_blank"><i class="fas fa-user"></i>Fearqwzz</a>
+    </p>
+    <p>Créditos: @trickcltnatoow</p>
+</div>
+
+
+    <div class="footer">
+        <p>&copy; 2024 FreeFireInfo. Todos os direitos reservados.</p>
+    </div>
+
+    <script>
+        let data = [];
+        const searchInput = document.getElementById('search');
+        const searchButton = document.getElementById('searchButton');
+        const resultsContainer = document.getElementById('results');
+        const resultCount = document.getElementById('resultCount');
+        const loadingMessage = document.getElementById('loadingMessage');
+
+        loadingMessage.classList.remove('hidden');
+
+        fetch('index.json')
+            .then(response => response.json())
+            .then(json => {
+                data = json;
+                loadingMessage.classList.add('hidden');
+            })
+            .catch(err => {
+                console.error("Erro ao carregar JSON:", err);
+                loadingMessage.textContent = "Erro ao carregar os dados.";
+            });
+
+        function performSearch() {
+            const query = searchInput.value.trim().toLowerCase();
+            resultsContainer.innerHTML = '';
+            resultCount.textContent = 'Resultados: 0';
+
+            if (query) {
+                const results = data.filter(item =>
+                    item.itemID.toLowerCase().includes(query) ||
+                    item.description.toLowerCase().includes(query)
+                );
+
+                if (results.length > 0) {
+                    resultCount.textContent = `Resultados: ${results.length}`;
+                    results.forEach((item, index) => {
+                        const resultDiv = document.createElement('div');
+                        resultDiv.classList.add('result');
+                        resultDiv.innerHTML = `
+                            <p><strong>Item ID:</strong> ${item.itemID}</p>
+                            <p><strong>Descrição:</strong> ${item.description}</p>
+                            ${item.description2 ? `<p><strong>Descrição 2:</strong> ${item.description2}</p>` : ''}
+                            <p><strong>Ícone:</strong> ${item.icon}</p>
+                        `;
+                        resultsContainer.appendChild(resultDiv);
+
+                        
+                        setTimeout(() => {
+                            resultDiv.classList.add('visible');
+                        }, index * 100);
+                    });
+                } else {
+                    resultsContainer.innerHTML = '<p class="text-red-500 text-center">Nenhum item encontrado com este termo.</p>';
+                }
+            }
+        }
+
+        searchButton.addEventListener('click', performSearch);
+        searchInput.addEventListener('keypress', (event) => {
+            if (event.key === 'Enter') {
+                performSearch();
+            }
+        });
+    </script>
+</body>
+</html>
